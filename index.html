@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>CYBER DOME // PROTOCOL: SURVIVE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div class="scanlines"></div>
+  <div id="damage-overlay"></div>
+
+  <!-- In-game HUD -->
+  <div id="ui-layer">
+    <!-- Top HUD -->
+    <div class="top-hud">
+      <div class="hud-card">
+        <div class="stat-block">
+          <span class="stat-label">SCORE</span>
+          <span id="score-display" class="stat-value">00000</span>
+        </div>
+        <div class="stat-block">
+          <span class="stat-label">HIGH</span>
+          <span id="high-score-display" class="stat-value yellow">00000</span>
+        </div>
+        <div class="stat-block">
+          <span class="stat-label">COMBO</span>
+          <span id="combo-display" class="stat-value magenta">x1.0</span>
+        </div>
+      </div>
+
+      <div class="wave-center">
+        <div class="wave-title">SECURITY LEVEL</div>
+        <div id="wave-display" class="wave-number">WAVE 01</div>
+      </div>
+
+      <div class="top-controls interactive">
+        <button id="sound-btn" class="hud-btn" title="Toggle Sound">🔊 SFX ON</button>
+        <button id="pause-btn" class="hud-btn" title="Pause Game [ESC]">⏸ PAUSE</button>
+      </div>
+    </div>
+
+    <!-- Wave Announcement Banner -->
+    <div id="wave-banner">
+      <div id="banner-title" class="banner-main">WAVE 01</div>
+      <div id="banner-sub" class="banner-sub">HOSTILES DETECTED // PURGE ARENA</div>
+    </div>
+
+    <!-- Bottom HUD -->
+    <div class="bottom-hud">
+      <div class="player-vitals">
+        <div class="bar-group">
+          <div class="bar-labels">
+            <span style="color: var(--neon-cyan);">HULL INTEGRITY</span>
+            <span id="health-num" style="color: #fff; font-family: 'Orbitron'; font-size: 0.8rem;">100%</span>
+          </div>
+          <div class="bar-container">
+            <div id="health-bar" class="bar-fill health" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="bar-group">
+          <div class="bar-labels">
+            <span style="color: #0088ff;">KINETIC SHIELD</span>
+            <span id="shield-num" style="color: #fff; font-family: 'Orbitron'; font-size: 0.8rem;">100%</span>
+          </div>
+          <div class="bar-container">
+            <div id="shield-bar" class="bar-fill shield" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="skills-cluster">
+          <div class="skill-slot">
+            <span class="skill-key">SPACE</span>
+            <span class="skill-name">CYBER DASH</span>
+            <div class="skill-meter">
+              <div id="dash-meter" class="skill-meter-fill" style="width: 100%;"></div>
+            </div>
+          </div>
+
+          <div class="skill-slot">
+            <span class="skill-key">R-CLICK / E</span>
+            <span class="skill-name">EMP BLAST</span>
+            <div class="skill-meter">
+              <div id="emp-meter" class="skill-meter-fill" style="width: 0%; background: var(--neon-cyan);"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="radar-wrapper">
+        <div class="radar-label">RADAR SCAN</div>
+        <canvas id="radar-canvas" width="130" height="130"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start Screen Modal -->
+  <div id="start-screen" class="screen-overlay active">
+    <div class="modal-box">
+      <h1 class="modal-title">CYBER DOME</h1>
+      <div class="modal-subtitle">// PROTOCOL: SURVIVE //</div>
+      
+      <div class="controls-grid">
+        <div class="ctrl-item">
+          <span class="key-badge">W A S D</span>
+          <span>Thruster Vector</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">MOUSE</span>
+          <span>Laser Aim Reticle</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">L-CLICK</span>
+          <span>Dual Plasma Fire</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">SPACE</span>
+          <span>Phase Dash Burst</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">E / R-CLK</span>
+          <span>EMP Shockwave</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">ESC / P</span>
+          <span>Tactical Pause</span>
+        </div>
+      </div>
+
+      <button id="start-btn" class="action-btn">
+        <span>INITIALIZE COMBAT</span>
+        <span style="font-size: 1.3rem;">⚡</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Pause Screen Modal -->
+  <div id="pause-screen" class="screen-overlay">
+    <div class="modal-box">
+      <h1 class="modal-title">SYSTEM PAUSED</h1>
+      <div class="modal-subtitle">// COMBAT SIMULATION SUSPENDED //</div>
+      <button id="resume-btn" class="action-btn">
+        <span>RESUME PROTOCOL</span>
+      </button>
+      <button id="restart-from-pause-btn" class="action-btn secondary">
+        <span>RESTART SIMULATION</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Over Screen Modal -->
+  <div id="gameover-screen" class="screen-overlay">
+    <div class="modal-box">
+      <h1 class="modal-title danger">SIGNAL TERMINATED</h1>
+      <div class="modal-subtitle">// MECH HULL DESTROYED //</div>
+
+      <div class="gameover-stats">
+        <div class="go-stat">
+          <div id="final-score" class="go-val">0</div>
+          <div class="go-lbl">FINAL SCORE</div>
+        </div>
+        <div class="go-stat highlight">
+          <div id="final-wave" class="go-val">WAVE 1</div>
+          <div class="go-lbl">WAVE REACHED</div>
+        </div>
+        <div class="go-stat">
+          <div id="final-kills" class="go-val">0</div>
+          <div class="go-lbl">DRONES PURGED</div>
+        </div>
+        <div class="go-stat">
+          <div id="final-cores" class="go-val">0</div>
+          <div class="go-lbl">CORES HARVESTED</div>
+        </div>
+      </div>
+
+      <button id="restart-btn" class="action-btn">
+        <span>SYSTEM REBOOT</span>
+        <span style="font-size: 1.2rem;">↻</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Three.js (r128) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script src="script.js"></script>
+</body>
+</html>
