@@ -13,6 +13,8 @@
   <div id="canvas-container"></div>
   <div class="scanlines"></div>
   <div id="damage-overlay"></div>
+  <div id="boss-warning-overlay"></div>
+  <div id="damage-text-layer"></div>
 
   <!-- In-game HUD -->
   <div id="ui-layer">
@@ -27,9 +29,14 @@
           <span class="stat-label">HIGH</span>
           <span id="high-score-display" class="stat-value yellow">00000</span>
         </div>
-        <div class="stat-block">
-          <span class="stat-label">COMBO</span>
-          <span id="combo-display" class="stat-value magenta">x1.0</span>
+        <div class="stat-block combo-block">
+          <div class="combo-text-row">
+            <span class="stat-label">COMBO</span>
+            <span id="combo-display" class="stat-value magenta">x1.0</span>
+          </div>
+          <div class="combo-bar-track">
+            <div id="combo-decay-bar" class="combo-bar-fill" style="width: 0%;"></div>
+          </div>
         </div>
       </div>
 
@@ -39,8 +46,24 @@
       </div>
 
       <div class="top-controls interactive">
+        <button id="leaderboard-top-btn" class="hud-btn" title="View Rankings">🏆 RANK</button>
         <button id="sound-btn" class="hud-btn" title="Toggle Sound">🔊 SFX ON</button>
         <button id="pause-btn" class="hud-btn" title="Pause Game [ESC]">⏸ PAUSE</button>
+      </div>
+    </div>
+
+    <!-- Boss Health Bar HUD (Top Center) -->
+    <div id="boss-hud" class="boss-hud-container">
+      <div class="boss-header">
+        <span class="boss-warning-badge">⚠️ THREAT ALERT</span>
+        <span id="boss-name" class="boss-title">CYBER COLOSSUS // TITAN-01</span>
+        <span id="boss-phase" class="boss-phase-badge">PHASE 1</span>
+      </div>
+      <div class="boss-hp-track">
+        <div id="boss-hp-bar" class="boss-hp-fill" style="width: 100%;"></div>
+      </div>
+      <div class="boss-hp-subtext">
+        <span id="boss-hp-text">100%</span>
       </div>
     </div>
 
@@ -52,6 +75,7 @@
 
     <!-- Bottom HUD -->
     <div class="bottom-hud">
+      <!-- Player Vitals (Left) -->
       <div class="player-vitals">
         <div class="bar-group">
           <div class="bar-labels">
@@ -73,28 +97,33 @@
           </div>
         </div>
 
-        <div class="skills-cluster">
-          <div class="skill-slot">
-            <span class="skill-key">SPACE</span>
-            <span class="skill-name">CYBER DASH</span>
-            <div class="skill-meter">
-              <div id="dash-meter" class="skill-meter-fill" style="width: 100%;"></div>
-            </div>
-          </div>
-
-          <div class="skill-slot">
-            <span class="skill-key">R-CLICK / E</span>
-            <span class="skill-name">EMP BLAST</span>
-            <div class="skill-meter">
-              <div id="emp-meter" class="skill-meter-fill" style="width: 0%; background: var(--neon-cyan);"></div>
-            </div>
-          </div>
+        <div class="pilot-badge-indicator">
+          <span class="pilot-label">PILOT:</span>
+          <span id="hud-pilot-name" class="pilot-name">CYBER_ACE</span>
         </div>
       </div>
 
-      <div class="radar-wrapper">
-        <div class="radar-label">RADAR SCAN</div>
-        <canvas id="radar-canvas" width="130" height="130"></canvas>
+      <!-- Centered Bottom Skills Dock -->
+      <div class="center-skills-dock">
+        <div class="skill-card" id="skill-dash-card">
+          <div class="skill-key-badge">SPACE</div>
+          <div class="skill-info">
+            <div class="skill-title">CYBER DASH</div>
+            <div class="skill-bar-wrapper">
+              <div id="dash-meter" class="skill-bar-fill dash" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="skill-card" id="skill-emp-card">
+          <div class="skill-key-badge special">E / R-CLK</div>
+          <div class="skill-info">
+            <div class="skill-title">EMP SHOCKWAVE</div>
+            <div class="skill-bar-wrapper">
+              <div id="emp-meter" class="skill-bar-fill emp" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -105,6 +134,15 @@
       <h1 class="modal-title">CYBER DOME</h1>
       <div class="modal-subtitle">// PROTOCOL: SURVIVE //</div>
       
+      <!-- Pilot Registration -->
+      <div class="pilot-input-card">
+        <label for="pilot-input" class="input-label">CALLSIGN REGISTRATION (.IO RANK)</label>
+        <div class="input-row">
+          <input type="text" id="pilot-input" maxlength="12" placeholder="ENTER CALLSIGN" value="NEO_PILOT" autocomplete="off" />
+          <button type="button" id="random-pilot-btn" class="icon-btn" title="Randomize Callsign">🎲</button>
+        </div>
+      </div>
+
       <div class="controls-grid">
         <div class="ctrl-item">
           <span class="key-badge">W A S D</span>
@@ -136,6 +174,39 @@
         <span>INITIALIZE COMBAT</span>
         <span style="font-size: 1.3rem;">⚡</span>
       </button>
+
+      <button id="open-leaderboard-btn" class="action-btn secondary">
+        <span>🏆 GLOBAL ARENA RANKINGS</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div id="leaderboard-screen" class="screen-overlay">
+    <div class="modal-box wide">
+      <h1 class="modal-title yellow">CYBER ARENA RANKINGS</h1>
+      <div class="modal-subtitle">// TOP SURVIVOR PROTOCOLS //</div>
+
+      <div class="leaderboard-table-wrapper">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>RANK</th>
+              <th>CALLSIGN</th>
+              <th>WAVE</th>
+              <th>KILLS</th>
+              <th>SCORE</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-rows">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <button id="close-leaderboard-btn" class="action-btn">
+        <span>RETURN</span>
+      </button>
     </div>
   </div>
 
@@ -155,9 +226,14 @@
 
   <!-- Game Over Screen Modal -->
   <div id="gameover-screen" class="screen-overlay">
-    <div class="modal-box">
+    <div class="modal-box wide">
       <h1 class="modal-title danger">SIGNAL TERMINATED</h1>
       <div class="modal-subtitle">// MECH HULL DESTROYED //</div>
+
+      <div id="player-rank-banner" class="rank-banner">
+        <span>FINAL ARENA RANK: </span>
+        <span id="player-rank-val" class="rank-highlight">#1</span>
+      </div>
 
       <div class="gameover-stats">
         <div class="go-stat">
@@ -175,6 +251,26 @@
         <div class="go-stat">
           <div id="final-cores" class="go-val">0</div>
           <div class="go-lbl">CORES HARVESTED</div>
+        </div>
+      </div>
+
+      <!-- Embedded Top Leaderboard in Game Over -->
+      <div class="leaderboard-mini-container">
+        <div class="mini-title">LEADERBOARD TOP PILOTS</div>
+        <div class="leaderboard-table-wrapper mini">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>RANK</th>
+                <th>CALLSIGN</th>
+                <th>WAVE</th>
+                <th>SCORE</th>
+              </tr>
+            </thead>
+            <tbody id="gameover-leaderboard-rows">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
         </div>
       </div>
 

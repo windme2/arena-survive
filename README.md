@@ -6,29 +6,42 @@ Zero external image/audio asset dependencies — 100% self-contained and procedu
 
 ---
 
-## Features
+## ✨ Features & Gameplay
 
-- **Dynamic 3D Arena & Lighting**: Directional key light with soft shadows (`PCFSoftShadowMap`), atmospheric cyberpunk fog (`THREE.FogExp2`), neon boundary laser fence, and tactical cover pylons.
-- **Procedural Canvas Textures**: Obsidian hex grid floor, warning hazard stripes, and particle flare sprites rendered on-the-fly via HTML5 Canvas.
-- **Procedural Web Audio API Sound Synthesizer**: Pure oscillator & noise-based sound effects for plasma blasts, enemy darts, metallic impacts, multi-stage low-pass filtered explosions, dash thrusters, and harmonic energy core pickups.
-- **Player Combat Mech**: Smooth vector acceleration, damping, alternating dual plasma cannons, 3D laser targeting line, ground reticle, and Cyber Dash with invulnerability frames.
+- **Expanded 3D Arena (65-unit Radius)**: Directional key light with soft dynamic shadows (`PCFSoftShadowMap`), atmospheric cyberpunk fog (`THREE.FogExp2`), neon boundary laser fence, and 10 tactical cover pillars.
+- **Boss Fights (Wave 5, 10, 15...)**:
+  - **Wave 5 Boss**: `CYBER COLOSSUS // TITAN-01`
+    - Dual rotary plasma cannons with heavy missile bursts.
+    - 16-way Omnidirectional Bullet Spiral.
+    - Ground Stomp Shockwave (expanding ring that requires Cyber Dash to evade).
+    - Berserk Phase (under 45% HP) with increased speed, fiery eye glow, and minion drone summons.
+  - Dedicated **Boss Health Bar HUD** with threat level alerts and real-time damage feedback.
+  - Emergency warning siren audio synthesizers and red screen pulse.
 - **Drone Enemies with Flocking AI**:
   - **Chaser Drone**: Fast, sharp tetrahedral swarmer.
-  - **Shooter Drone**: Hovering sniper turret that strafes and shoots energy projectiles.
-  - **Heavy Juggernaut**: High-durability cyber-golem with devastating blast radius.
-- **Power-ups & Skills**:
-  - **Energy Cores**: Magnetic suction towards player, restores health and charges EMP meter.
-  - **EMP Super Shockwave**: Neutralizes all enemy projectiles in the arena and stuns drones.
-- **Cyberpunk HUD**: Health & Kinetic Shield meters, Combo Multiplier, Wave counter, real-time 2D Minimap/Radar, Tactical Pause (`ESC`/`P`), and High Score tracking (`localStorage`).
+  - **Shooter Drone**: Hovering sniper turret that strafes and shoots energy darts.
+  - **Heavy Juggernaut**: High-durability cyber-golem with high-yield blast radius.
+- **Combat Mechanics**:
+  - Dual alternating plasma cannons with muzzle flashes and critical hits.
+  - **Cyber Dash (SPACE)**: Rapid thrust with invulnerability frames.
+  - **EMP Shockwave (E / Right-Click)**: Annihilates all incoming enemy projectiles and stuns nearby enemies.
+  - **Combo Multiplier with Visual Countdown Bar**: Earn up to x4.0 score multiplier with a real-time decay meter.
+  - **Floating Damage Numbers**: 3D-to-2D projected combat text (`28`, `56 CRIT!`, `150 EMP!`).
+- **.IO Style Leaderboard & Pilot Registration**:
+  - Enter custom **Pilot Callsign** with random cyber name generator.
+  - Local & simulated rival pilots on the **Global Arena Leaderboard**.
+  - Persistent High Scores and Ranks saved in `localStorage`.
+- **Procedural Web Audio API Synthesizer**:
+  - Pure procedural sound effects: player plasma shots, enemy darts, metallic hits, multi-stage low-pass filtered noise explosions, dash whooshes, energy core chimes, boss siren alarms, and ground stomps.
 
 ---
 
-## Controls
+## 🎮 Controls
 
 | Key / Input | Action |
 | :--- | :--- |
 | `W`, `A`, `S`, `D` / Arrows | Thruster movement (smooth vector physics) |
-| `Mouse` | 3D ground aim with laser sight |
+| `Mouse` | 3D ground aim with laser sight & reticle |
 | `Left Click` (Hold/Tap) | Fire alternating dual plasma cannons |
 | `Spacebar` / `Shift` | Cyber Dash (phase burst with invulnerability) |
 | `Right Click` / `E` | EMP Shockwave (when gauge is 100%) |
@@ -36,9 +49,9 @@ Zero external image/audio asset dependencies — 100% self-contained and procedu
 
 ---
 
-## How to Run
+## 🚀 How to Run
 
-Simply open `index.html` in any modern web browser or serve locally:
+Simply open `index.html` in any modern web browser or run a local server:
 
 ```bash
 # Using Python
