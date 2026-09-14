@@ -52,12 +52,14 @@
       </div>
     </div>
 
-    <!-- Boss Health Bar HUD (Top Center) -->
+    <!-- Boss Health Bar HUD (Top Right Widget) -->
     <div id="boss-hud" class="boss-hud-container">
       <div class="boss-header">
-        <span class="boss-warning-badge">⚠️ THREAT ALERT</span>
+        <div class="boss-badge-row">
+          <span id="boss-warning-badge" class="boss-warning-badge">⚠️ THREAT ALERT</span>
+          <span id="boss-phase" class="boss-phase-badge">PHASE 1</span>
+        </div>
         <span id="boss-name" class="boss-title">CYBER COLOSSUS // TITAN-01</span>
-        <span id="boss-phase" class="boss-phase-badge">PHASE 1</span>
       </div>
       <div class="boss-hp-track">
         <div id="boss-hp-bar" class="boss-hp-fill" style="width: 100%;"></div>
@@ -73,10 +75,57 @@
       <div id="banner-sub" class="banner-sub">HOSTILES DETECTED // PURGE ARENA</div>
     </div>
 
+    <!-- Multi-Kill Streak Arcade Banner -->
+    <div id="streak-banner" class="streak-banner">
+      <div id="streak-text" class="streak-title">DOUBLE PURGE!</div>
+    </div>
+
+    <!-- Off-Screen Boss Threat Pointer -->
+    <div id="boss-offscreen-pointer" class="offscreen-pointer">
+      <div id="boss-pointer-arrow" class="pointer-arrow-icon">▲</div>
+      <div class="pointer-label-box">
+        <span class="pointer-tag">TARGET</span>
+        <span id="boss-pointer-text" class="pointer-name">BOSS [45m]</span>
+      </div>
+    </div>
+
+    <!-- Boss Counter-Vulnerability Floating Indicator -->
+    <div id="boss-vuln-indicator" class="boss-vuln-indicator">
+      <div class="vuln-inner">
+        <span class="vuln-flash-icon">⚡</span>
+        <span class="vuln-text">VULNERABLE</span>
+        <span class="vuln-flash-icon">⚡</span>
+      </div>
+      <div class="vuln-prompt">STRIKE WITH EMP [E]</div>
+    </div>
+
+    <!-- Dynamic Cyber Crosshair & Hit-Marker -->
+    <div id="cyber-crosshair" class="cyber-crosshair">
+      <div class="crosshair-ring"></div>
+      <div class="crosshair-dot"></div>
+      <div class="hitmarker tl"></div>
+      <div class="hitmarker tr"></div>
+      <div class="hitmarker bl"></div>
+      <div class="hitmarker br"></div>
+    </div>
+
     <!-- Bottom HUD -->
     <div class="bottom-hud">
       <!-- Player Vitals (Left) -->
       <div class="player-vitals">
+        <!-- Active Buffs & Item Stacks (Above Hull Bar) -->
+        <div id="active-buffs-dock" class="active-buffs-dock">
+          <!-- Overcharge Weapon Buff Badge -->
+          <div id="overcharge-hud" class="overcharge-badge">
+            <span class="oc-icon">⚡</span>
+            <span class="oc-label">OVERCHARGE:</span>
+            <span id="oc-timer" class="oc-timer">12.0s</span>
+          </div>
+
+          <!-- Active Augments Container (Live Stacks & Passives) -->
+          <div id="augments-hud-container" class="augments-hud-container"></div>
+        </div>
+
         <div class="bar-group">
           <div class="bar-labels">
             <span style="color: var(--neon-cyan);">HULL INTEGRITY</span>
@@ -99,7 +148,7 @@
 
         <div class="pilot-badge-indicator">
           <span class="pilot-label">PILOT:</span>
-          <span id="hud-pilot-name" class="pilot-name">CYBER_ACE</span>
+          <span id="hud-pilot-name" class="pilot-name">PILOT_01</span>
         </div>
       </div>
 
@@ -136,10 +185,33 @@
       
       <!-- Pilot Registration -->
       <div class="pilot-input-card">
-        <label for="pilot-input" class="input-label">CALLSIGN REGISTRATION (.IO RANK)</label>
+        <label for="pilot-input" class="input-label">CALLSIGN REGISTRATION (RECORDED TO LEADERBOARD)</label>
         <div class="input-row">
-          <input type="text" id="pilot-input" maxlength="12" placeholder="ENTER CALLSIGN" value="NEO_PILOT" autocomplete="off" />
+          <input type="text" id="pilot-input" maxlength="12" placeholder="ENTER CALLSIGN" value="PILOT_01" autocomplete="off" />
           <button type="button" id="random-pilot-btn" class="icon-btn" title="Randomize Callsign">🎲</button>
+        </div>
+      </div>
+
+      <!-- Mecha Customization & Neon Palette -->
+      <div class="palette-selector-card">
+        <label class="input-label">MECHA NEON PALETTE</label>
+        <div class="palette-options" id="palette-options">
+          <button type="button" class="palette-btn active" data-palette="CYAN">
+            <span class="swatch" style="background: #00f3ff;"></span>
+            <span>CYAN</span>
+          </button>
+          <button type="button" class="palette-btn" data-palette="EMERALD">
+            <span class="swatch" style="background: #00ff66;"></span>
+            <span>EMERALD</span>
+          </button>
+          <button type="button" class="palette-btn" data-palette="VIOLET">
+            <span class="swatch" style="background: #d946ef;"></span>
+            <span>VIOLET</span>
+          </button>
+          <button type="button" class="palette-btn" data-palette="GOLD">
+            <span class="swatch" style="background: #ffe600;"></span>
+            <span>GOLD</span>
+          </button>
         </div>
       </div>
 
@@ -176,7 +248,7 @@
       </button>
 
       <button id="open-leaderboard-btn" class="action-btn secondary">
-        <span>🏆 GLOBAL ARENA RANKINGS</span>
+        <span>🏆 ARENA SURVIVOR RECORDS</span>
       </button>
     </div>
   </div>
@@ -184,8 +256,8 @@
   <!-- Leaderboard Modal -->
   <div id="leaderboard-screen" class="screen-overlay">
     <div class="modal-box wide">
-      <h1 class="modal-title yellow">CYBER ARENA RANKINGS</h1>
-      <div class="modal-subtitle">// TOP SURVIVOR PROTOCOLS //</div>
+      <h1 class="modal-title yellow">ARENA RECORDS</h1>
+      <div class="modal-subtitle">// PERSONAL COMBAT ARCHIVE //</div>
 
       <div class="leaderboard-table-wrapper">
         <table class="leaderboard-table">
@@ -193,6 +265,7 @@
             <tr>
               <th>RANK</th>
               <th>CALLSIGN</th>
+              <th>GRADE</th>
               <th>WAVE</th>
               <th>KILLS</th>
               <th>SCORE</th>
@@ -204,9 +277,14 @@
         </table>
       </div>
 
-      <button id="close-leaderboard-btn" class="action-btn">
-        <span>RETURN</span>
-      </button>
+      <div class="leaderboard-actions-row">
+        <button id="close-leaderboard-btn" class="action-btn">
+          <span>RETURN</span>
+        </button>
+        <button id="clear-leaderboard-btn" class="action-btn secondary danger-hover">
+          <span>RESET RECORDS</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -231,8 +309,35 @@
       <div class="modal-subtitle">// MECH HULL DESTROYED //</div>
 
       <div id="player-rank-banner" class="rank-banner">
-        <span>FINAL ARENA RANK: </span>
+        <span>SESSION RANK: </span>
         <span id="player-rank-val" class="rank-highlight">#1</span>
+      </div>
+
+      <!-- Combat Performance Rating Badge -->
+      <div class="combat-grade-card">
+        <div class="grade-badge-left">
+          <div class="grade-label">COMBAT PERFORMANCE</div>
+          <div id="combat-rating-grade" class="rating-grade-stamp grade-s">S</div>
+          <div id="grade-title" class="grade-subtext">ELITE COMBATANT</div>
+        </div>
+        <div class="grade-stats-grid">
+          <div class="grade-stat-item">
+            <span class="gs-val" id="grade-parries">0</span>
+            <span class="gs-lbl">PARRY REFLECTS</span>
+          </div>
+          <div class="grade-stat-item">
+            <span class="gs-val" id="grade-stuns">0</span>
+            <span class="gs-lbl">COUNTER STUNS</span>
+          </div>
+          <div class="grade-stat-item">
+            <span class="gs-val" id="grade-accuracy">0%</span>
+            <span class="gs-lbl">ACCURACY</span>
+          </div>
+          <div class="grade-stat-item">
+            <span class="gs-val" id="grade-max-combo">x1.0</span>
+            <span class="gs-lbl">MAX COMBO</span>
+          </div>
+        </div>
       </div>
 
       <div class="gameover-stats">
@@ -256,13 +361,14 @@
 
       <!-- Embedded Top Leaderboard in Game Over -->
       <div class="leaderboard-mini-container">
-        <div class="mini-title">LEADERBOARD TOP PILOTS</div>
+        <div class="mini-title">YOUR COMBAT RECORD (TOP RUNS)</div>
         <div class="leaderboard-table-wrapper mini">
           <table class="leaderboard-table">
             <thead>
               <tr>
                 <th>RANK</th>
                 <th>CALLSIGN</th>
+                <th>GRADE</th>
                 <th>WAVE</th>
                 <th>SCORE</th>
               </tr>
@@ -281,8 +387,22 @@
     </div>
   </div>
 
+  <!-- Weapon Augment Chip Modal -->
+  <div id="augment-screen" class="screen-overlay">
+    <div class="modal-box wide augment-modal-box">
+      <h1 class="modal-title yellow">WEAPON AUGMENT CHIP</h1>
+      <div class="modal-subtitle" id="augment-modal-subtitle">// SELECT TACTICAL UPGRADE PROTOCOL //</div>
+
+      <div id="augment-cards-grid" class="augment-cards-grid">
+        <!-- Dynamically injected per Wave (5, 10, 15) -->
+      </div>
+    </div>
+  </div>
+
   <!-- Three.js (r128) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Canvas Confetti FX Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <script src="script.js"></script>
 </body>
