@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>CYBER DOME // PROTOCOL: SURVIVE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="canvas-container"></div>
+  <div class="scanlines"></div>
+  <div id="damage-overlay"></div>
+  <div id="boss-warning-overlay"></div>
+  <div id="damage-text-layer"></div>
+
+  <!-- In-game HUD -->
+  <div id="ui-layer">
+    <!-- Top HUD -->
+    <div class="top-hud">
+      <div class="hud-card">
+        <div class="stat-block">
+          <span class="stat-label">SCORE</span>
+          <span id="score-display" class="stat-value">00000</span>
+        </div>
+        <div class="stat-block">
+          <span class="stat-label">HIGH</span>
+          <span id="high-score-display" class="stat-value yellow">00000</span>
+        </div>
+        <div class="stat-block combo-block">
+          <div class="combo-text-row">
+            <span class="stat-label">COMBO</span>
+            <span id="combo-display" class="stat-value magenta">x1.0</span>
+          </div>
+          <div class="combo-bar-track">
+            <div id="combo-decay-bar" class="combo-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="wave-center">
+        <div class="wave-title">SECURITY LEVEL</div>
+        <div id="wave-display" class="wave-number">WAVE 01</div>
+        <div id="sector-name" class="sector-name">SECTOR ALPHA</div>
+        <div class="wave-progress-track"><div id="wave-progress" class="wave-progress-fill"></div></div>
+        <div id="wave-remaining" class="wave-remaining">HOSTILES 0</div>
+      </div>
+
+      <div class="top-controls interactive">
+        <button id="leaderboard-top-btn" class="hud-btn" title="View Rankings">🏆 RANK</button>
+        <button id="sound-btn" class="hud-btn" title="Toggle Sound">🔊 SFX ON</button>
+        <button id="pause-btn" class="hud-btn" title="Pause Game [ESC]">⏸ PAUSE</button>
+      </div>
+    </div>
+
+    <!-- Boss Health Bar HUD (Top Right Widget) -->
+    <div id="boss-hud" class="boss-hud-container">
+      <div class="boss-header">
+        <div class="boss-badge-row">
+          <span id="boss-warning-badge" class="boss-warning-badge">⚠️ THREAT ALERT</span>
+          <span id="boss-phase" class="boss-phase-badge">PHASE 1</span>
+        </div>
+        <span id="boss-name" class="boss-title">CYBER COLOSSUS // TITAN-01</span>
+      </div>
+      <div class="boss-hp-track">
+        <div id="boss-hp-bar" class="boss-hp-fill" style="width: 100%;"></div>
+      </div>
+      <div class="boss-hp-subtext">
+        <span id="boss-hp-text">100%</span>
+      </div>
+    </div>
+
+    <!-- Wave Announcement Banner -->
+    <div id="wave-banner">
+      <div id="banner-title" class="banner-main">WAVE 01</div>
+      <div id="banner-sub" class="banner-sub">HOSTILES DETECTED // PURGE ARENA</div>
+    </div>
+
+    <!-- Multi-Kill Streak Arcade Banner -->
+    <div id="streak-banner" class="streak-banner">
+      <div id="streak-text" class="streak-title">DOUBLE PURGE!</div>
+    </div>
+
+    <!-- Off-Screen Boss Threat Pointer -->
+    <div id="boss-offscreen-pointer" class="offscreen-pointer">
+      <div id="boss-pointer-arrow" class="pointer-arrow-icon">▲</div>
+      <div class="pointer-label-box">
+        <span class="pointer-tag">TARGET</span>
+        <span id="boss-pointer-text" class="pointer-name">BOSS [45m]</span>
+      </div>
+    </div>
+
+    <!-- Boss Counter-Vulnerability Floating Indicator -->
+    <div id="boss-vuln-indicator" class="boss-vuln-indicator">
+      <div class="vuln-inner">
+        <span class="vuln-flash-icon">⚡</span>
+        <span class="vuln-text">VULNERABLE</span>
+        <span class="vuln-flash-icon">⚡</span>
+      </div>
+      <div class="vuln-prompt">STRIKE NOW!</div>
+    </div>
+
+    <!-- Dynamic Cyber Crosshair & Hit-Marker -->
+    <div id="cyber-crosshair" class="cyber-crosshair">
+      <div class="crosshair-ring"></div>
+      <div class="crosshair-dot"></div>
+      <div class="hitmarker tl"></div>
+      <div class="hitmarker tr"></div>
+      <div class="hitmarker bl"></div>
+      <div class="hitmarker br"></div>
+    </div>
+
+    <!-- Bottom HUD -->
+    <div class="bottom-hud">
+      <!-- Player Vitals (Left) -->
+      <div class="player-vitals">
+        <!-- Active Buffs & Item Stacks (Above Hull Bar) -->
+        <div id="active-buffs-dock" class="active-buffs-dock">
+          <!-- Overcharge Weapon Buff Badge -->
+          <div id="overcharge-hud" class="overcharge-badge">
+            <span class="oc-icon">⚡</span>
+            <span class="oc-label">OVERCHARGE:</span>
+            <span id="oc-timer" class="oc-timer">12.0s</span>
+          </div>
+
+          <!-- Active Augments Container (Live Stacks & Passives) -->
+          <div id="augments-hud-container" class="augments-hud-container"></div>
+        </div>
+
+        <div class="bar-group">
+          <div class="bar-labels">
+            <span style="color: var(--neon-cyan);">HULL INTEGRITY</span>
+            <span id="health-num" style="color: #fff; font-family: 'Orbitron'; font-size: 0.8rem;">100%</span>
+          </div>
+          <div class="bar-container">
+            <div id="health-bar" class="bar-fill health" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="bar-group">
+          <div class="bar-labels">
+            <span style="color: #0088ff;">KINETIC SHIELD</span>
+            <span id="shield-num" style="color: #fff; font-family: 'Orbitron'; font-size: 0.8rem;">100%</span>
+          </div>
+          <div class="bar-container">
+            <div id="shield-bar" class="bar-fill shield" style="width: 100%;"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Centered Bottom Skills Dock (bars only) -->
+      <div class="center-skills-dock">
+        <div class="skill-card" id="skill-dash-card">
+          <div class="skill-bar-wrapper">
+            <div id="dash-meter" class="skill-bar-fill dash" style="width: 100%;"></div>
+          </div>
+        </div>
+        <div class="skill-card" id="skill-emp-card">
+          <div class="skill-bar-wrapper">
+            <div id="emp-meter" class="skill-bar-fill emp" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Touch Controls (landscape twin-stick) -->
+  <div id="touch-controls">
+    <div id="stick-move" class="stick-zone left"><div class="stick-base"><div class="stick-knob"></div></div></div>
+    <div id="stick-aim" class="stick-zone right"><div class="stick-base fire"><div class="stick-knob"></div></div></div>
+  </div>
+  <div id="rotate-prompt"><div>⟳</div><p>ROTATE DEVICE TO LANDSCAPE</p></div>
+
+  <!-- Start Screen Modal -->
+  <div id="start-screen" class="screen-overlay active">
+    <div class="modal-box">
+      <h1 class="modal-title">CYBER DOME</h1>
+      <div class="modal-subtitle">// PROTOCOL: SURVIVE //</div>
+      
+      <!-- Pilot Registration -->
+      <div class="pilot-input-card">
+        <label for="pilot-input" class="input-label">CALLSIGN REGISTRATION (RECORDED TO LEADERBOARD)</label>
+        <div class="input-row">
+          <input type="text" id="pilot-input" maxlength="12" placeholder="ENTER CALLSIGN" value="PILOT_01" autocomplete="off" />
+          <button type="button" id="random-pilot-btn" class="icon-btn" title="Randomize Callsign">🎲</button>
+        </div>
+      </div>
+
+      <!-- Mecha Customization & Neon Palette -->
+      <div class="palette-selector-card">
+        <label class="input-label">MECHA NEON PALETTE</label>
+        <div class="palette-options" id="palette-options">
+          <button type="button" class="palette-btn active" data-palette="CYAN">
+            <span class="swatch" style="background: #00f3ff;"></span>
+            <span>CYAN</span>
+          </button>
+          <button type="button" class="palette-btn" data-palette="EMERALD">
+            <span class="swatch" style="background: #00ff66;"></span>
+            <span>EMERALD</span>
+          </button>
+          <button type="button" class="palette-btn" data-palette="VIOLET">
+            <span class="swatch" style="background: #d946ef;"></span>
+            <span>VIOLET</span>
+          </button>
+          <button type="button" class="palette-btn" data-palette="GOLD">
+            <span class="swatch" style="background: #ffe600;"></span>
+            <span>GOLD</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="controls-grid">
+        <div class="ctrl-item">
+          <span class="key-badge">W A S D</span>
+          <span>Thruster Vector</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">MOUSE</span>
+          <span>Laser Aim Reticle</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">L-CLICK</span>
+          <span>Dual Plasma Fire</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">SPACE</span>
+          <span>Phase Dash Burst</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">E / R-CLK</span>
+          <span>EMP Shockwave</span>
+        </div>
+        <div class="ctrl-item">
+          <span class="key-badge">ESC / P</span>
+          <span>Tactical Pause</span>
+        </div>
+      </div>
+
+      <button id="start-btn" class="action-btn">
+        <span>INITIALIZE COMBAT</span>
+        <span style="font-size: 1.3rem;">⚡</span>
+      </button>
+
+      <button id="open-leaderboard-btn" class="action-btn secondary">
+        <span>🏆 ARENA SURVIVOR RECORDS</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div id="leaderboard-screen" class="screen-overlay">
+    <div class="modal-box wide">
+      <h1 class="modal-title yellow">ARENA RECORDS</h1>
+      <div class="modal-subtitle">// PERSONAL COMBAT ARCHIVE //</div>
+
+      <div class="leaderboard-table-wrapper">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>RANK</th>
+              <th>CALLSIGN</th>
+              <th>GRADE</th>
+              <th>WAVE</th>
+              <th>KILLS</th>
+              <th>SCORE</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-rows">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="leaderboard-actions-row">
+        <button id="close-leaderboard-btn" class="action-btn">
+          <span>RETURN</span>
+        </button>
+        <button id="clear-leaderboard-btn" class="action-btn secondary danger-hover">
+          <span>RESET RECORDS</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Screen Modal -->
+  <div id="pause-screen" class="screen-overlay">
+    <div class="modal-box">
+      <h1 class="modal-title">SYSTEM PAUSED</h1>
+      <div class="modal-subtitle">// COMBAT SIMULATION SUSPENDED //</div>
+      <button id="resume-btn" class="action-btn">
+        <span>RESUME PROTOCOL</span>
+      </button>
+      <button id="restart-from-pause-btn" class="action-btn secondary">
+        <span>RESTART SIMULATION</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Over Screen Modal -->
+  <div id="gameover-screen" class="screen-overlay">
+    <div class="modal-box wide">
+      <h1 class="modal-title danger">SIGNAL TERMINATED</h1>
+      <div class="modal-subtitle">// MECH HULL DESTROYED //</div>
+
+      <div id="player-rank-banner" class="rank-banner">
+        <span>SESSION RANK: </span>
+        <span id="player-rank-val" class="rank-highlight">#1</span>
+      </div>
+
+      <!-- Combat Performance Rating Badge -->
+      <div class="combat-grade-card">
+        <div class="grade-badge-left">
+          <div class="grade-label">COMBAT PERFORMANCE</div>
+          <div id="combat-rating-grade" class="rating-grade-stamp grade-s">S</div>
+          <div id="grade-title" class="grade-subtext">ELITE COMBATANT</div>
+        </div>
+        <div class="grade-stats-grid">
+          <div class="grade-stat-item">
+            <span class="gs-val" id="grade-parries">0</span>
+            <span class="gs-lbl">PARRY REFLECTS</span>
+          </div>
+          <div class="grade-stat-item">
+            <span class="gs-val" id="grade-stuns">0</span>
+            <span class="gs-lbl">COUNTER STUNS</span>
+          </div>
+          <div class="grade-stat-item">
+            <span class="gs-val" id="grade-accuracy">0%</span>
+            <span class="gs-lbl">ACCURACY</span>
+          </div>
+          <div class="grade-stat-item">
+            <span class="gs-val" id="grade-max-combo">x1.0</span>
+            <span class="gs-lbl">MAX COMBO</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="gameover-stats">
+        <div class="go-stat">
+          <div id="final-score" class="go-val">0</div>
+          <div class="go-lbl">FINAL SCORE</div>
+        </div>
+        <div class="go-stat highlight">
+          <div id="final-wave" class="go-val">WAVE 1</div>
+          <div class="go-lbl">WAVE REACHED</div>
+        </div>
+        <div class="go-stat">
+          <div id="final-kills" class="go-val">0</div>
+          <div class="go-lbl">DRONES PURGED</div>
+        </div>
+        <div class="go-stat">
+          <div id="final-cores" class="go-val">0</div>
+          <div class="go-lbl">CORES HARVESTED</div>
+        </div>
+      </div>
+
+      <!-- Embedded Top Leaderboard in Game Over -->
+      <div class="leaderboard-mini-container">
+        <div class="mini-title">YOUR COMBAT RECORD (TOP RUNS)</div>
+        <div class="leaderboard-table-wrapper mini">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>RANK</th>
+                <th>CALLSIGN</th>
+                <th>GRADE</th>
+                <th>WAVE</th>
+                <th>SCORE</th>
+              </tr>
+            </thead>
+            <tbody id="gameover-leaderboard-rows">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <button id="restart-btn" class="action-btn">
+        <span>SYSTEM REBOOT</span>
+        <span style="font-size: 1.2rem;">↻</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Weapon Augment Chip Modal -->
+  <div id="augment-screen" class="screen-overlay">
+    <div class="modal-box wide augment-modal-box">
+      <h1 class="modal-title yellow">WEAPON AUGMENT CHIP</h1>
+      <div class="modal-subtitle" id="augment-modal-subtitle">// SELECT TACTICAL UPGRADE PROTOCOL //</div>
+
+      <div id="augment-cards-grid" class="augment-cards-grid">
+        <!-- Dynamically injected per Wave (5, 10, 15) -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Three.js (r128) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Canvas Confetti FX Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <script src="script.js"></script>
+</body>
+</html>
